@@ -7,7 +7,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center  bg-gray-50">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

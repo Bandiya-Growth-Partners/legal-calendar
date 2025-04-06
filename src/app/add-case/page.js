@@ -9,8 +9,8 @@ export default function AddCasePage() {
   
   return (
     <>
-      <Navigation />
-      <div className="min-h-screen bg-gray-50 pt-16">
+      {/* <Navigation /> */}
+      <div className=" bg-gray-50 pt-16">
         <AddCaseForm 
           isOpen={true} 
           onClose={() => router.back()} 

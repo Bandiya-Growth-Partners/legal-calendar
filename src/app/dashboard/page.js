@@ -1,6 +1,6 @@
 'use client';
 
-import DashboardContent from '../components/DashboardContent';
+import DashboardContent from '../components/DashboardPage';
 import Navigation from '../components/Navigation';
 import { useState } from 'react';
 import AddCaseForm from '../components/AddCaseForm';

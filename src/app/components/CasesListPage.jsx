@@ -1,12 +1,32 @@
+'use client';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, ChevronDown, ChevronRight, Calendar, Mail, Phone, Clock } from 'lucide-react';
+import AddCaseForm from './AddCaseForm';
+
 
 const CasesListPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCases, setFilteredCases] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  
+  // Two separate states for filter selection and applied filters
+  const [filterSelections, setFilterSelections] = useState({
+    applicationType: '',
+    status: '',
+    startDate: '',
+    endDate: ''
+  });
+  
+  // This state will only be updated when Apply Filters is clicked
+  const [appliedFilters, setAppliedFilters] = useState({
+    applicationType: '',
+    status: '',
+    startDate: '',
+    endDate: ''
+  });
   
   // Mock data for cases
   const cases = [
@@ -67,27 +87,117 @@ const CasesListPage = () => {
     }
   ];
 
-  // Filter function
+  // Search function - search should still work immediately
   const handleSearch = (query) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      setFilteredCases([]);
-      return;
+    
+    // Apply search with current filters
+    if (query.trim() === '') {
+      // If search query is empty, just apply the filters
+      applyFiltersAndSearch('', appliedFilters);
+    } else {
+      applyFiltersAndSearch(query, appliedFilters);
+    }
+  };
+
+  // Handle filter selection changes (doesn't apply them yet)
+  const handleFilterChange = (name, value) => {
+    setFilterSelections(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Apply button click handler
+  const handleApplyFilters = () => {
+    setAppliedFilters(filterSelections);
+    applyFiltersAndSearch(searchQuery, filterSelections);
+  };
+
+  // Apply filters and search
+  const applyFiltersAndSearch = (query, currentFilters) => {
+    const lowercaseQuery = query.toLowerCase().trim();
+    
+    let filtered = cases;
+    
+    // Apply search if query exists
+    if (lowercaseQuery) {
+      filtered = filtered.filter(
+        item => 
+          item.applicationNumber.toLowerCase().includes(lowercaseQuery) ||
+          item.clientName.toLowerCase().includes(lowercaseQuery) ||
+          item.clientEmail.toLowerCase().includes(lowercaseQuery) ||
+          item.applicationType.toLowerCase().includes(lowercaseQuery)
+      );
     }
     
-    const lowercaseQuery = query.toLowerCase();
-    const filtered = cases.filter(
-      item => 
-        item.applicationNumber.toLowerCase().includes(lowercaseQuery) ||
-        item.clientName.toLowerCase().includes(lowercaseQuery) ||
-        item.clientEmail.toLowerCase().includes(lowercaseQuery) ||
-        item.applicationType.toLowerCase().includes(lowercaseQuery)
-    );
+    // Apply type filter
+    if (currentFilters.applicationType) {
+      filtered = filtered.filter(
+        item => item.applicationType.toLowerCase() === currentFilters.applicationType.toLowerCase()
+      );
+    }
+    
+    // Apply status filter
+    if (currentFilters.status) {
+      filtered = filtered.filter(
+        item => item.status.toLowerCase() === currentFilters.status.toLowerCase()
+      );
+    }
+    
+    // Apply date range filter
+    if (currentFilters.startDate && currentFilters.endDate) {
+      const startDate = new Date(currentFilters.startDate);
+      const endDate = new Date(currentFilters.endDate);
+      
+      filtered = filtered.filter(item => {
+        const appDate = new Date(item.applicationDate);
+        return appDate >= startDate && appDate <= endDate;
+      });
+    } else if (currentFilters.startDate) {
+      const startDate = new Date(currentFilters.startDate);
+      
+      filtered = filtered.filter(item => {
+        const appDate = new Date(item.applicationDate);
+        return appDate >= startDate;
+      });
+    } else if (currentFilters.endDate) {
+      const endDate = new Date(currentFilters.endDate);
+      
+      filtered = filtered.filter(item => {
+        const appDate = new Date(item.applicationDate);
+        return appDate <= endDate;
+      });
+    }
     
     setFilteredCases(filtered);
   };
 
-  const casesToDisplay = searchQuery ? filteredCases : cases;
+  // Clear all filters
+  const clearFilters = () => {
+    const emptyFilters = {
+      applicationType: '',
+      status: '',
+      startDate: '',
+      endDate: ''
+    };
+    
+    // Clear both selection and applied filters
+    setFilterSelections(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    
+    // Re-run search with empty filters
+    if (searchQuery) {
+      applyFiltersAndSearch(searchQuery, emptyFilters);
+    } else {
+      setFilteredCases([]);
+    }
+  };
+
+  // Determine which cases to display
+  const casesToDisplay = searchQuery || Object.values(appliedFilters).some(val => val !== '') 
+    ? filteredCases 
+    : cases;
 
   // Handle case selection
   const toggleCaseSelection = (caseItem) => {
@@ -127,7 +237,7 @@ const CasesListPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -172,21 +282,29 @@ const CasesListPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
-                  <select className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  <select 
+                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    value={filterSelections.applicationType}
+                    onChange={(e) => handleFilterChange('applicationType', e.target.value)}
+                  >
                     <option value="">All Types</option>
-                    <option value="trademark">Trademark</option>
-                    <option value="patent">Patent</option>
-                    <option value="copyright">Copyright</option>
+                    <option value="Trademark">Trademark</option>
+                    <option value="Patent">Patent</option>
+                    <option value="Copyright">Copyright</option>
                   </select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                  <select 
+                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    value={filterSelections.status}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                  >
                     <option value="">All Statuses</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
-                    <option value="review">Under Review</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Under Review">Under Review</option>
                   </select>
                 </div>
                 
@@ -196,21 +314,31 @@ const CasesListPage = () => {
                     <input 
                       type="date" 
                       className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                      value={filterSelections.startDate}
+                      onChange={(e) => handleFilterChange('startDate', e.target.value)}
                     />
                     <span className="text-gray-500 self-center">to</span>
                     <input 
                       type="date" 
                       className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                      value={filterSelections.endDate}
+                      onChange={(e) => handleFilterChange('endDate', e.target.value)}
                     />
                   </div>
                 </div>
               </div>
               
               <div className="mt-4 flex justify-end">
-                <button className="px-4 py-2 text-sm text-indigo-600 hover:text-indigo-500">
+                <button 
+                  className="px-4 py-2 text-sm text-indigo-600 hover:text-indigo-500"
+                  onClick={clearFilters}
+                >
                   Clear Filters
                 </button>
-                <button className="ml-3 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button 
+                  className="ml-3 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={handleApplyFilters}
+                >
                   Apply Filters
                 </button>
               </div>
@@ -257,7 +385,7 @@ const CasesListPage = () => {
                       <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                         <Calendar className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                         <p>
-                          Deadline: {new Date(caseItem.nextDeadline).toLocaleDateString()}
+                          Deadline: {caseItem.nextDeadline}
                         </p>
                       </div>
                     </div>
@@ -294,11 +422,11 @@ const CasesListPage = () => {
                           </p>
                           <p className="mt-1 flex items-center text-sm text-gray-500">
                             <Calendar className="mr-1.5 h-4 w-4 text-gray-400" />
-                            Filed: {new Date(caseItem.applicationDate).toLocaleDateString()}
+                            Filed: {caseItem.applicationDate}
                           </p>
                           <p className="mt-1 flex items-center text-sm text-gray-500">
                             <Clock className="mr-1.5 h-4 w-4 text-gray-400" />
-                            Next Deadline: {new Date(caseItem.nextDeadline).toLocaleDateString()}
+                            Next Deadline: {caseItem.nextDeadline}
                           </p>
                         </div>
                       </div>
@@ -307,26 +435,33 @@ const CasesListPage = () => {
                         <button className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500 border border-transparent rounded-md hover:border-indigo-300">
                           View Details
                         </button>
-                        <button className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500 border border-transparent rounded-md hover:border-indigo-300">
+                        <button 
+                          className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500 border border-transparent rounded-md hover:border-indigo-300"
+                          onClick={() => setIsFormOpen(true)}
+                        >
                           Edit Case
                         </button>
                         <button className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                           Manage Reminders
-                        </button>
+                        </button>                      
                       </div>
+                      <AddCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
                     </motion.div>
                   )}
                 </li>
               ))}
             </ul>
-          ) : searchQuery ? (
+          ) : searchQuery || Object.values(appliedFilters).some(val => val !== '') ? (
             <div className="px-6 py-10 text-center">
               <p className="text-gray-500">No cases found matching your search criteria.</p>
               <button 
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  clearFilters();
+                }}
                 className="mt-2 text-indigo-600 hover:text-indigo-500"
               >
-                Clear search
+                Clear all filters
               </button>
             </div>
           ) : (

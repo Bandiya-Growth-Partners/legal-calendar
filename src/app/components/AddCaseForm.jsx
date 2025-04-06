@@ -226,21 +226,21 @@ const AddCaseForm = ({ isOpen, onClose }) => {
 };
 
 // Demo component to show the form
-const AddCasePage = () => {
-  const [isFormOpen, setIsFormOpen] = useState(true);
+// const AddCasePage = () => {
+//   const [isFormOpen, setIsFormOpen] = useState(true);
   
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <button
-        onClick={() => setIsFormOpen(true)}
-        className="px-4 py-2 bg-indigo-600 text-white rounded-md"
-      >
-        Open Add Case Form
-      </button>
+//   return (
+//     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//       <button
+//         onClick={() => setIsFormOpen(true)}
+//         className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+//       >
+//         Open Add Case Form
+//       </button>
       
-      <AddCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
-    </div>
-  );
-};
+//       <AddCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+//     </div>
+//   );
+// };
 
-export default AddCasePage;
+export default AddCaseForm;

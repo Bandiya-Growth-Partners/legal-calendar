@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 export default function Navigation() {
   const pathname = usePathname();
   
-  if (pathname === '/login') return null; // Don't show navigation on login page
+  // if (pathname === '/login') return null; // Don't show navigation on login page
   
   return (
     <header className="bg-white shadow">
@@ -14,7 +14,7 @@ export default function Navigation() {
         <div className="flex items-center">
           <Calendar className="h-8 w-8 text-indigo-600" />
           <Link href="/dashboard">
-            <h1 className="ml-2 text-xl font-semibold text-gray-900">LegalCalendar</h1>
+            <h1 className="ml-2 text-xl font-semibold text-gray-900">Donna</h1>
           </Link>
         </div>
         <nav className="hidden md:flex space-x-6">

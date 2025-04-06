@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Plus, Search, Bell, User, LogOut } from 'lucide-react';
+import AddCaseForm from './AddCaseForm'; // Assuming you have this component
 
 const DashboardPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
-  
+  const [isFormOpen, setIsFormOpen] = useState(false);
   // Mock data for upcoming dates
   const upcomingDates = [
     { id: 1, title: "Smith v. Johnson", type: "Trademark", date: "Mar 25, 2025", client: "Smith Corp", highlight: true },
@@ -75,9 +76,9 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      {/* <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Calendar className="h-8 w-8 text-indigo-600" />
@@ -112,7 +113,7 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -221,13 +222,39 @@ const DashboardPage = () => {
       </main>
       
       {/* Floating Action Button */}
-      <motion.button
+      {/* <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg"
       >
         <Plus className="h-6 w-6" />
-      </motion.button>
+      </motion.button> */}
+     
+       
+        
+  
+          <div className="bg-gray-50 flex items-center justify-center">
+            {/* <button
+              onClick={() => setIsFormOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+            >
+              Open Add Case Form
+            </button> */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg"
+              onClick={() => setIsFormOpen(true)}
+            >
+              <Plus className="h-6 w-6" />
+            </motion.button>
+            
+            <AddCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+          </div>
+        
+      
+      
+      
     </div>
   );
 };
